@@ -1,7 +1,18 @@
 import React from "react";
 import Link from "next/link";
 import PropTypes from "prop-types";
-import { Menu, Input, Button } from "antd";
+import { Menu, Input, Row, Col } from "antd";
+import LoginForm from "../components/LoginForm";
+import UserProfile from "../components/UserProfile";
+
+
+const dummy = {
+  nickname: "필영",
+  Post: [],
+  Followings: [],
+  Followers: [],
+  isLoggedIn: true,
+};
 
 const AppLayout = ({ children }) => {
   return (
@@ -21,18 +32,26 @@ const AppLayout = ({ children }) => {
           <Input.Search enterButton style={{ verticalAlign: "middle" }} />
         </Menu.Item>
       </Menu>
-      <Link href="/signup">
-        <a>
-          <Button>회원가입</Button>
-        </a>
-      </Link>
-      {children}
+      <Row gutter={8}>
+        <Col xs={24} md={6}>
+          {dummy.isLoggedIn ? (
+            <UserProfile />
+          ) : <LoginForm />}
+        </Col>
+
+        <Col xs={24} md={12}>
+          {children}
+        </Col>
+        <Col xs={24} md={6}>
+          
+        </Col>
+      </Row>
     </div>
   );
 };
 
 AppLayout.propTypes = {
   children: PropTypes.node,
-}
+};
 
 export default AppLayout;

@@ -1,6 +1,8 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Form, Input, Checkbox, Button } from "antd";
-
+import { useDispatch, useSelector } from "react-redux";
+import { signUpRequestAction } from "../reducers/user";
+import Router from "next/router";
 // const TextInput = memo(({name, value, onChange }) => {
 //   return (
 //     <Input name={name} value={value} required onChange={onChange} />
@@ -8,23 +10,30 @@ import { Form, Input, Checkbox, Button } from "antd";
 // });
 
 export const useInput = (initValue = null) => {
-    const [value, setter] = useState(initValue);
-    const handler = useCallback((e) => {
-      setter(e.target.value);
-    }, []);
-    return [value, handler];
-  };
+  const [value, setter] = useState(initValue);
+  const handler = useCallback((e) => {
+    setter(e.target.value);
+  }, []);
+  return [value, handler];
+};
 
 const Signup = () => {
+  const dispatch = useDispatch();
+  const { isSigningUp, me } = useSelector(state => state.user);
+  const [id, onChangeId] = useInput("");
+  const [nick, onChangeNick] = useInput("");
+  const [password, onChangePassword] = useInput("");
+
   const [passwordCheck, setPasswordCheck] = useState("");
   const [term, setTerm] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
   const [termError, setTermError] = useState(false);
 
-
-  const [id, onChangeId] = useInput("");
-  const [nick, onChangeNick] = useInput("");
-  const [password, onChangePassword] = useInput("");
+  useEffect(() => {
+    if (me) {
+      Router.push('/');
+    }
+  }, [me && me.id])
 
   const onSubmit = useCallback(
     (e) => {
@@ -35,15 +44,22 @@ const Signup = () => {
       if (!term) {
         return setTermError(true);
       }
+      dispatch(
+        signUpRequestAction({
+          id,
+          password,
+          nick,
+        })
+      );
     },
     [password, passwordCheck, term]
   );
   // useCallback - 함수 내부에서 쓰는 state를 deps 배열에 입력한다.
 
-  const onChangePasswordCheck = useCallback((e) => {
+const onChangePasswordCheck = useCallback((e) => {
     setPasswordError(e.target.value !== password);
     setPasswordCheck(e.target.value);
-  }, []);
+  }, [password]);
 
   const onChangeTerm = useCallback((e) => {
     setTermError(false);
@@ -61,7 +77,7 @@ const Signup = () => {
         <div>
           <label htmlFor="user-nick">닉네임</label>
           <br />
-          <Input name="user-nick" value={nick} onChange={onChangeNick} /> 
+          <Input name="user-nick" value={nick} onChange={onChangeNick} />
         </div>
         <div>
           <label htmlFor="user-pass">비밀번호</label>
@@ -96,7 +112,7 @@ const Signup = () => {
           )}
         </div>
         <div style={{ marginTop: 10 }}>
-          <Button type="primary" htmlType="submit" onClick={onSubmit}>
+          <Button type="primary" htmlType="submit" onClick={onSubmit} loading={isSigningUp}>
             가입하기
           </Button>
         </div>

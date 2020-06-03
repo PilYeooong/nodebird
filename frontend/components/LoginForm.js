@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Form, Input, Button } from "antd";
 import { useInput } from "../pages/signup";
 import { useDispatch, useSelector } from "react-redux";
-import { loginRequestAction } from "../reducers/user";
+import { LOG_IN_REQUEST } from "../reducers/user";
 
 const LoginForm = () => {
   const [id, onChangeId] = useInput('');
@@ -13,10 +13,13 @@ const LoginForm = () => {
 
   const onSubmitForm = useCallback((e) => {
     e.preventDefault();
-    dispatch(loginRequestAction({
-      id,
-      password
-    }));
+    dispatch({
+      type: LOG_IN_REQUEST,
+      data: {
+        userId: id,
+        password
+      }
+    })
   }, [id, password]);
 
   return (
@@ -37,6 +40,7 @@ const LoginForm = () => {
         <Input
           name="user-password"
           value={password}
+          type="password"
           onChange={onChangePassword}
           required
         />

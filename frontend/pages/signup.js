@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { Form, Input, Checkbox, Button } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import { signUpRequestAction } from "../reducers/user";
+import { signUpRequestAction, SIGN_UP_REQUEST } from "../reducers/user";
 import Router from "next/router";
 // const TextInput = memo(({name, value, onChange }) => {
 //   return (
@@ -21,7 +21,7 @@ const Signup = () => {
   const dispatch = useDispatch();
   const { isSigningUp, me } = useSelector(state => state.user);
   const [id, onChangeId] = useInput("");
-  const [nick, onChangeNick] = useInput("");
+  const [nickname, onChangeNickname] = useInput("");
   const [password, onChangePassword] = useInput("");
 
   const [passwordCheck, setPasswordCheck] = useState("");
@@ -44,15 +44,16 @@ const Signup = () => {
       if (!term) {
         return setTermError(true);
       }
-      dispatch(
-        signUpRequestAction({
-          id,
+      dispatch({
+        type: SIGN_UP_REQUEST,
+        data: {
+          userId: id,
           password,
-          nick,
-        })
-      );
+          nickname
+        }
+      })
     },
-    [password, passwordCheck, term]
+    [id, nickname, password, passwordCheck, term]
   );
   // useCallback - 함수 내부에서 쓰는 state를 deps 배열에 입력한다.
 
@@ -77,7 +78,7 @@ const onChangePasswordCheck = useCallback((e) => {
         <div>
           <label htmlFor="user-nick">닉네임</label>
           <br />
-          <Input name="user-nick" value={nick} onChange={onChangeNick} />
+          <Input name="user-nick" value={nickname} onChange={onChangeNickname} />
         </div>
         <div>
           <label htmlFor="user-pass">비밀번호</label>

@@ -1,0 +1,1 @@
+export const backUrl = process.env.NODE_ENV === 'production' ? 'http://ec2-52-79-131-16.ap-northeast-2.compute.amazonaws.com' : 'http://localhost:3065'

@@ -42,7 +42,6 @@ import {
   EDIT_NICKNAME_FAILURE,
 } from "../reducers/user";
 
-axios.defaults.baseURL = "http://localhost:3065/api/";
 
 function loginAPI(loginData) {
   return axios.post("/user/login", loginData, {

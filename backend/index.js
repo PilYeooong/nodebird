@@ -41,6 +41,9 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session()); // express-session이 실행후에 동작해야함
 
+app.get('/', (req, res) => {
+  res.send('nodebird working');
+})
 app.use("/api/user", userAPIRouter);
 app.use("/api/post", postAPIRouter);
 app.use("/api/posts", postsAPIRouter);

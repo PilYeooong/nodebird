@@ -2,7 +2,6 @@ import React, { useState, useCallback } from "react";
 import PropTypes from "prop-types";
 import { PlusOutlined } from "@ant-design/icons";
 import ImagesZoom from "./ImagesZoom";
-import { backUrl } from "../config/config";
 
 const PostImages = ({ images }) => {
   const [showImagesZoom, setShowImagesZoom] = useState(false);
@@ -15,7 +14,7 @@ const PostImages = ({ images }) => {
   if (images.length === 1) {
     return (
       <>
-        <img src={`${backUrl}/${images[0].src}`} onClick={onZoom} />
+        <img src={`${images[0].src}`} onClick={onZoom} />
         {showImagesZoom && <ImagesZoom images={images} onClose={onClose} />}
       </>
     );
@@ -25,12 +24,12 @@ const PostImages = ({ images }) => {
       <>
         <div>
           <img
-            src={`${backUrl}/${images[0].src}`}
+            src={`${images[0].src}`}
             width="50%"
             onClick={onZoom}
           />
           <img
-            src={`${backUrl}/${images[1].src}`}
+            src={`${images[1].src}`}
             width="50%"
             onClick={onZoom}
           />
@@ -43,7 +42,7 @@ const PostImages = ({ images }) => {
     <>
       <div>
         <img
-          src={`${backUrl}/${images[0].src}`}
+          src={`${images[0].src}`}
           width="50%"
           onClick={onZoom}
         />

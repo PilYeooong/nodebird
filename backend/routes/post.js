@@ -3,18 +3,37 @@ const db = require("../models");
 const path = require("path");
 const multer = require("multer");
 const { isLoggedIn } = require("./middleware");
+const multerS3 = require('multer-s3');
+const AWS = require('aws-sdk');
 
 const router = express.Router();
 
+AWS.config.update({
+  region: 'ap-northeast-2',
+  accessKeyId: process.env.S3_ACCESS_KEY_ID,
+  secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+});
+
+// const upload = multer({
+//   storage: multer.diskStorage({
+//     destination(req, file, done) {
+//       done(null, "uploads");
+//     },
+//     filename(req, file, done) {
+//       const ext = path.extname(file.originalname);
+//       const basename = path.basename(file.originalname, ext);
+//       done(null, basename + new Date().valueOf() + ext);
+//     },
+//   }),
+//   limits: { fileSize: 20 * 1024 * 1024 }, // 악의적 요청을 대비한 limit 설정이 바람직
+// });
+
 const upload = multer({
-  storage: multer.diskStorage({
-    destination(req, file, done) {
-      done(null, "uploads");
-    },
-    filename(req, file, done) {
-      const ext = path.extname(file.originalname);
-      const basename = path.basename(file.originalname, ext);
-      done(null, basename + new Date().valueOf() + ext);
+  storage: multerS3({
+    s3: new AWS.S3(),
+    bucket: 'nodebird-pilyeong',
+    key(req, file, cb) {
+      cb(null, `original/${+new Data()}${path.basename(file.originalname)}`);
     },
   }),
   limits: { fileSize: 20 * 1024 * 1024 }, // 악의적 요청을 대비한 limit 설정이 바람직
@@ -72,7 +91,8 @@ router.post("/", isLoggedIn, upload.none(), async (req, res, next) => {
 });
 
 router.post("/images", upload.array("image"), (req, res) => {
-  res.json(req.files.map((v) => v.filename));
+  // res.json(req.files.map((v) => v.filename));
+  res.json(req.files.map((v) => v.location)); // S3는 location
 });
 
 router.get("/:id/comments", async (req, res, next) => {

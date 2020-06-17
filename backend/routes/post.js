@@ -33,7 +33,7 @@ const upload = multer({
     s3: new AWS.S3(),
     bucket: 'nodebird-pilyeong',
     key(req, file, cb) {
-      cb(null, `original/${+new Data()}${path.basename(file.originalname)}`);
+      cb(null, `original/${+new Date()}${path.basename(file.originalname)}`);
     },
   }),
   limits: { fileSize: 20 * 1024 * 1024 }, // 악의적 요청을 대비한 limit 설정이 바람직
@@ -92,6 +92,7 @@ router.post("/", isLoggedIn, upload.none(), async (req, res, next) => {
 
 router.post("/images", upload.array("image"), (req, res) => {
   // res.json(req.files.map((v) => v.filename));
+  console.log(req.files);
   res.json(req.files.map((v) => v.location)); // S3는 location
 });
 

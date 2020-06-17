@@ -17,7 +17,7 @@ const hashtagAPIRouter = require("./routes/hashtag");
 
 dotenv.config();
 
-const prod = process.end.NODE_ENV === 'propduction';
+const prod = process.env.NODE_ENV === 'propduction';
 
 const app = express();
 db.sequelize.sync();

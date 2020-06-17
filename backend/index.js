@@ -28,7 +28,8 @@ if (prod) {
   app.use(helmet());
   app.use(morgan('combined'));
   app.use(cors({
-    origin: 'http://ec2-15-165-123-14.ap-northeast-2.compute.amazonaws.com/',
+    // origin: 'http://ec2-15-165-123-14.ap-northeast-2.compute.amazonaws.com/',
+    origin: true,
     credentials: true,
   }))
 } else {

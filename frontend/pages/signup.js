@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { Form, Input, Checkbox, Button } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import { signUpRequestAction, SIGN_UP_REQUEST } from "../reducers/user";
+import { SIGN_UP_REQUEST } from "../reducers/user";
 import Router from "next/router";
 // const TextInput = memo(({name, value, onChange }) => {
 //   return (
@@ -31,6 +31,7 @@ const Signup = () => {
 
   useEffect(() => {
     if (me) {
+      alert('로그인 유저는 접근할 수 없습니다.');
       Router.push('/');
     }
   }, [me && me.id])
@@ -67,6 +68,10 @@ const onChangePasswordCheck = useCallback((e) => {
     setTerm(e.target.checked);
   }, []);
 
+  if(me){
+    return null;
+  }
+  
   return (
     <>
       <Form onSubmit={onSubmit} style={{ padding: 10 }}>

@@ -1,82 +1,193 @@
 import React, { useState, useCallback, useEffect } from "react";
 import PropTypes from "prop-types";
-import { Button, Card, Avatar, Form, Input, List, Comment } from "antd";
+import {
+  Button,
+  Card,
+  Avatar,
+  List,
+  Comment,
+  Popover,
+} from "antd";
 import {
   RetweetOutlined,
   HeartOutlined,
+  HeartTwoTone,
   MessageOutlined,
   EllipsisOutlined,
 } from "@ant-design/icons";
 import { useSelector, useDispatch } from "react-redux";
-import { ADD_COMMENT_REQUEST } from "../reducers/post";
+import {
+  LOAD_COMMENTS_REQUEST,
+  UNLIKE_POST_REQUEST,
+  LIKE_POST_REQUEST,
+  RETWEET_REQUEST,
+  REMOVE_POST_REQUEST,
+} from "../reducers/post";
+import { FOLLOW_USER_REQUEST, UNFOLLOW_USER_REQUEST } from "../reducers/user";
+import Link from "next/link";
+import PostImages from "./PostImages";
+import PostCardContent from "./PostCardContent.js";
+import FollowButton from "./FollowButton";
+import CommentForm from "./CommentForm";
+import styled from "styled-components";
+import moment from "moment";
+moment.locale('ko');
+
+const CardWrapper = styled.div`
+  margin-bottom: 2rem;
+`;
 
 const PostCard = ({ post }) => {
   const [commentFormOpened, setCommentFormOpened] = useState(false);
-  const [commentText, setCommentText] = useState("");
-  const { me } = useSelector((state) => state.user);
-  const { commentAdded, isAddingComment } = useSelector((state) => state.post);
+  const id = useSelector((state) => state.user.me && state.user.me.id);
+
   const dispatch = useDispatch();
+
+  const liked = id && post.Likers && post.Likers.find((v) => v.id === id);
 
   const onToggleComment = useCallback(() => {
     setCommentFormOpened((prev) => !prev);
-  }, []);
-  
-  const onSubmitComment = useCallback((e) => {
-    e.preventDefault();
-    if(!me){
-      alert("로그인이 필요합니다.");
-      return
+    if (!commentFormOpened) {
+      dispatch({
+        type: LOAD_COMMENTS_REQUEST,
+        data: post.id,
+      });
+    }
+  }, [commentFormOpened]);
+
+  const onToggleLike = useCallback(() => {
+    if (!id) {
+      return alert("로그인이 필요합니다.");
+    }
+    if (liked) {
+      dispatch({
+        type: UNLIKE_POST_REQUEST,
+        data: post.id,
+      });
+    } else {
+      dispatch({
+        type: LIKE_POST_REQUEST,
+        data: post.id,
+      });
+    }
+  }, [id && post && post.id, liked]);
+
+  const onRetweet = useCallback(() => {
+    if (!id) {
+      return alert("로그인이 필요합니다");
     }
     dispatch({
-      type: ADD_COMMENT_REQUEST,
-      data: {
-        postId: post.id,
-      }
-    })
-  }, [me && me.id])
+      type: RETWEET_REQUEST,
+      data: post.id,
+    });
+  }, [id, post.id]);
 
-  useEffect(() => {
-    setCommentText('');
-  }, [commentAdded === true])
+  const onFollow = (userId) => () => {
+    dispatch({
+      type: FOLLOW_USER_REQUEST,
+      data: userId,
+    });
+  };
 
-  const onChangeCommentText = useCallback((e) => {
-    setCommentText(e.target.value);  
-  }, [])
+  const onUnFollow = (userId) => () => {
+    dispatch({
+      type: UNFOLLOW_USER_REQUEST,
+      data: userId,
+    });
+  };
 
+  const onRemovePost = (postId) => () => {
+    dispatch({
+      type: REMOVE_POST_REQUEST,
+      data: postId,
+    });
+  };
 
   return (
-    <div>
+    <CardWrapper>
       <Card
-        key={+post.createdAt}
-        cover={post.img && <img alt="example" src={post.img} />}
+        cover={
+          post.Images && post.Images[0] && <PostImages images={post.Images} />
+        }
         actions={[
-          <RetweetOutlined key="retweet" />,
-          <HeartOutlined key="heart" />,
+          <RetweetOutlined key="retweet" onClick={onRetweet} />,
+          liked ? (
+            <HeartTwoTone twoToneColor="#eb2f96" onClick={onToggleLike} />
+          ) : (
+            <HeartOutlined key="heart" onClick={onToggleLike} />
+          ),
           <MessageOutlined key="message" onClick={onToggleComment} />,
-          <EllipsisOutlined key="ellipsis" />,
+          <Popover
+            key="ellipsis"
+            content={
+              <Button.Group>
+                {id && post.UserId === id ? (
+                  <>
+                    <Button>수정</Button>
+                    <Button type="danger" onClick={onRemovePost(post.id)}>
+                      삭제
+                    </Button>
+                  </>
+                ) : (
+                  <Button>신고</Button>
+                )}
+              </Button.Group>
+            }
+          >
+            <EllipsisOutlined key="ellipsis" />
+          </Popover>,
         ]}
-        extra={<Button>팔로우</Button>}
+        title={
+          post.RetweetId ? `${post.User.nickname}님이 리트윗 하셨습니다.` : null
+        }
+        extra={<FollowButton me={id} post={post} onFollow={onFollow} onUnFollow={onUnFollow} />
+         
+        }
       >
-        <Card.Meta
-          avatar={<Avatar>{post.User.nickname[0]}</Avatar>}
-          title={post.User.nickname}
-          description={post.content}
-        />
+        {post.RetweetId && post.Retweet ? (
+          <Card
+            cover={
+              post.Retweet.Images[0] && (
+                <PostImages images={post.Retweet.Images} />
+              )
+            }
+          >
+            <Card.Meta
+              avatar={
+                <Link
+                  href={{ pathname: "/user", query: { id: post.User.id } }}
+                  as={`/user/${post.User.id}`}
+                >
+                  <a>
+                    <Avatar>{post.Retweet.User.nickname[0]}</Avatar>
+                  </a>
+                </Link>
+              }
+              title={post.Retweet.User.nickname}
+              description={<PostCardContent postData={post.Retweet.content} />}
+              />
+          </Card>
+        ) : (
+          <Card.Meta
+            avatar={
+              <Link
+                href={{ pathname: "/user", query: { id: post.User.id } }}
+                as={`/user/${post.User.id}`}
+              >
+                <a>
+                  <Avatar>{post.User.nickname[0]}</Avatar>
+                </a>
+              </Link>
+            }
+            title={post.User.nickname}
+            description={<PostCardContent postData={post.content} />}
+          />
+        )}
       </Card>
+
       {commentFormOpened && (
         <>
-          <Form onSubmit={onSubmitComment}>
-            <Form.Item>
-              <Input.TextArea
-                rows={4}
-                value={commentText}
-                onChange={onChangeCommentText}
-              />
-            </Form.Item>
-            <Button type="primary" htmlType="submit" onClick={onSubmitComment} loading={isAddingComment}>
-              삐약
-            </Button>
-          </Form>
+          <CommentForm post={post} />
           <List
             header={`${post.Comments ? post.Comments.length : 0} 댓글`}
             itemLayout="horizontal"
@@ -85,25 +196,40 @@ const PostCard = ({ post }) => {
               <li>
                 <Comment
                   author={item.User.nickname}
-                  avatar={<Avatar>{item.User.nickname[0]}</Avatar>}
+                  avatar={
+                    <Link
+                      href={{ pathname: "/user", query: { id: item.User.id } }}
+                      as={`/user/${item.User.id}`}
+                    >
+                      <a>
+                        <Avatar>{item.User.nickname[0]}</Avatar>
+                      </a>
+                    </Link>
+                  }
                   content={item.content}
-                  // datetime={item.createdAt}
                 />
               </li>
             )}
           />
         </>
       )}
-    </div>
+    </CardWrapper>
   );
 };
 
 PostCard.propTypes = {
   post: PropTypes.shape({
+    id: PropTypes.number,
     User: PropTypes.object,
+    UserId: PropTypes.number,
     content: PropTypes.string,
     img: PropTypes.string,
-    createdAt: PropTypes.object,
+    createdAt: PropTypes.string,
+    Likers: PropTypes.array,
+    RetweetId: PropTypes.number,
+    Retweet: PropTypes.object,
+    Images: PropTypes.array,
+    Comments: PropTypes.array,
   }),
 };
 

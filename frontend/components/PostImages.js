@@ -14,7 +14,7 @@ const PostImages = ({ images }) => {
   if (images.length === 1) {
     return (
       <>
-        <img src={`${images[0].src}`} onClick={onZoom} />
+        <img src={`${images[0].src.replace(/original\//, 'thumb/')}`} onClick={onZoom} />
         {showImagesZoom && <ImagesZoom images={images} onClose={onClose} />}
       </>
     );
@@ -24,12 +24,12 @@ const PostImages = ({ images }) => {
       <>
         <div>
           <img
-            src={`${images[0].src}`}
+            src={`${images[0].src.replace(/original\//, 'thumb/')}`}
             width="50%"
             onClick={onZoom}
           />
           <img
-            src={`${images[1].src}`}
+            src={`${images[1].src.replace(/original\//, 'thumb/')}`}
             width="50%"
             onClick={onZoom}
           />

@@ -44,7 +44,7 @@ app.use(
     cookie: {
       httpOnly: true,
       secure: false, // https를 이용할 때 true
-      domain: prod && '.ap-northeast-2.compute.amazonaws.com',
+      // domain: prod && '.ap-northeast-2.compute.amazonaws.com',
     },
     name: 'rnbck',
   })

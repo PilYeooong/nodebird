@@ -27,11 +27,13 @@ if (prod) {
   app.use(hpp());
   app.use(helmet());
   app.use(morgan('combined'));
+  app.use(cors({ origin: '15.165.123.14', credentials: true }));
 } else {
   app.use(morgan("dev"));
+  app.use(cors({ origin: true, credentials: true }));
 }
 
-app.use(cors({ origin: true, credentials: true }));
+console.log(prod);
 app.use('/', express.static('uploads')); // uploads의 경로가 아닌 / 로 접근이 가능토록 한다. (프론트의 접근주소, 실제 서버에서의 경로)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -44,7 +46,7 @@ app.use(
     cookie: {
       httpOnly: true,
       secure: false, // https를 이용할 때 true
-      // domain: prod && '.ap-northeast-2.compute.amazonaws.com',
+      domain: prod && '15.165.123.14',
     },
     name: 'rnbck',
   })

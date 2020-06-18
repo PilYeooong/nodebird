@@ -53,6 +53,8 @@ const Signup = () => {
           nickname
         }
       })
+      alert('로그인을 해주세요');
+      Router.push('/');
     },
     [id, nickname, password, passwordCheck, term]
   );
@@ -71,7 +73,7 @@ const onChangePasswordCheck = useCallback((e) => {
   if(me){
     return null;
   }
-  
+
   return (
     <>
       <Form onSubmit={onSubmit} style={{ padding: 10 }}>
